@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mutiara Smart School Ceria - TK Mutiara Harapan</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- html2pdf.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen antialiased selection:bg-teal-200">
+
+    <!-- AUDIO EFFECTS -->
+    <audio id="victoryAudio" src="https://actions.google.com/sounds/v1/cheers/crowd_cheer.ogg"></audio>
+    <audio id="popAudio" src="https://actions.google.com/sounds/v1/cartoon/pop.ogg"></audio>
+
+    <!-- TOAST NOTIFIKASI -->
+    <div id="syncToast" class="fixed bottom-20 lg:bottom-6 right-4 z-50 bg-slate-900 text-white text-xs font-bold px-4 py-3 rounded-2xl shadow-xl flex items-center space-x-2 transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-emerald-400 text-sm"></i>
+        <span id="syncToastText">Aksi berhasil disimpan!</span>
+    </div>
+
+    <!-- TOP HEADER NAVBAR -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <!-- Logo & Brand -->
+                <div class="flex items-center space-x-3 cursor-pointer" onclick="switchTab('dashboard')">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-tr from-amber-400 via-pink-500 to-purple-500 rounded-2xl flex items-center justify-center text-white text-xl sm:text-2xl shadow-md transform -rotate-3 hover:rotate-0 transition">
+                        <i class="fa-solid fa-graduation-cap"></i>
+                    </div>
+                    <div>
+                        <span class="kids-title text-base sm:text-2xl font-bold bg-gradient-to-r from-blue-600 via-teal-500 to-pink-500 bg-clip-text text-transparent block">
+                            MUTIARA SMART SCHOOL
+                        </span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-teal-600 bg-teal-50 px-2 py-0.5 rounded-full border border-teal-200">
+                                TK Mutiara Harapan • <span id="headerStudentCount">26</span> Siswa
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Desktop Navigation Tabs -->
+                <nav class="hidden lg:flex space-x-1 font-medium text-xs sm:text-sm">
+                    <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-chart-pie text-blue-500"></i>
+                        <span>Dashboard</span>
+                    </button>
+                    <button onclick="switchTab('materials')" id="nav-materials" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-book-open text-purple-500"></i>
+                        <span>Kuis Bergambar</span>
+                    </button>
+                    <button onclick="switchTab('games')" id="nav-games" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-gamepad text-indigo-500"></i>
+                        <span>5 Games TK</span>
+                    </button>
+                    <button onclick="switchTab('reading')" id="nav-reading" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-spell-check text-pink-500"></i>
+                        <span>Phonics Suara</span>
+                    </button>
+                    <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-trophy text-amber-500"></i>
+                        <span>Peringkat</span>
+                    </button>
+                    <button onclick="switchTab('info')" id="nav-info" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-bullhorn text-red-500"></i>
+                        <span>Pengumuman</span>
+                    </button>
+                    <button onclick="switchTab('students')" id="nav-students" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-users text-teal-500"></i>
+                        <span>Data Siswa</span>
+                    </button>
+                    <button onclick="switchTab('excel')" id="nav-excel" class="nav-btn px-3 py-2 rounded-xl transition flex items-center space-x-1.5 text-slate-600 hover:bg-slate-100">
+                        <i class="fa-solid fa-file-excel text-green-600"></i>
+                        <span>Rekap Nilai</span>
+                    </button>
+                </nav>
+
+                <!-- Action -->
+                <div class="flex items-center space-x-2">
+                    <button onclick="sharePortalLink()" class="p-2 sm:px-3 sm:py-2 rounded-2xl bg-blue-100 hover:bg-blue-200 text-blue-800 font-bold text-xs transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-share-nodes"></i>
+                        <span class="hidden md:inline">Share Link</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MOBILE BOTTOM NAVIGATION -->
+    <nav class="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 z-40 px-2 py-1.5 flex justify-around items-center shadow-lg">
+        <button onclick="switchTab('dashboard')" class="flex flex-col items-center p-1 text-slate-600 hover:text-teal-600">
+            <i class="fa-solid fa-chart-pie text-base"></i>
+            <span class="text-[10px] mt-0.5">Home</span>
+        </button>
+        <button onclick="switchTab('materials')" class="flex flex-col items-center p-1 text-slate-600 hover:text-teal-600">
+            <i class="fa-solid fa-book-open text-base"></i>
+            <span class="text-[10px] mt-0.5">Kuis</span>
+        </button>
+        <button onclick="switchTab('games')" class="flex flex-col items-center p-1 text-slate-600 hover:text-teal-600">
+            <i class="fa-solid fa-gamepad text-base"></i>
+            <span class="text-[10px] mt-0.5">Games</span>
+        </button>
+        <button onclick="switchTab('reading')" class="flex flex-col items-center p-1 text-slate-600 hover:text-teal-600">
+            <i class="fa-solid fa-spell-check text-base"></i>
+            <span class="text-[10px] mt-0.5">Phonics</span>
+        </button>
+        <button onclick="switchTab('students')" class="flex flex-col items-center p-1 text-slate-600 hover:text-teal-600">
+            <i class="fa-solid fa-users text-base"></i>
+            <span class="text-[10px] mt-0.5">Siswa</span>
+        </button>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 mb-16 lg:mb-0">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-blue-600 via-teal-500 to-emerald-500 p-6 sm:p-8 rounded-3xl text-white shadow-xl relative overflow-hidden">
+                <div class="relative z-10 space-y-3 max-w-2xl">
+                    <span class="bg-white/20 backdrop-blur-md font-bold text-[10px] sm:text-xs px-3 py-1 rounded-full uppercase tracking-wider inline-block">Portal Belajar Interaktif • Akses Terbuka Tanpa Sandi</span>
+                    <h2 class="kids-title text-2xl sm:text-4xl font-bold">TK Mutiara Harapan Smart Portal</h2>
+                    <p class="text-xs sm:text-sm text-blue-50 leading-relaxed">Kecamatan Tanjung Medan, Kabupaten Rokan Hilir, Provinsi Riau. Dilengkapi kuis bergambar bersuara, 5 mini-games edukasi TK, serta manajemen data lengkap (Tambah, Ubah, Hapus, Backup & Restore Data).</p>
+                    <div class="pt-2 flex flex-wrap gap-2">
+                        <button onclick="switchTab('materials')" class="bg-amber-400 text-amber-950 hover:bg-amber-300 font-bold text-xs px-4 py-2.5 rounded-xl shadow flex items-center space-x-2 transition">
+                            <i class="fa-solid fa-play"></i>
+                            <span>Mulai Kuis Bergambar</span>
+                        </button>
+                        <button onclick="switchTab('games')" class="bg-white text-teal-700 hover:bg-teal-50 font-bold text-xs px-4 py-2.5 rounded-xl shadow flex items-center space-x-2 transition">
+                            <i class="fa-solid fa-gamepad"></i>
+                            <span>Main Games Belajar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dashboard Stats Grid -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center space-x-3 sm:space-x-4 cursor-pointer hover:border-blue-300 transition" onclick="switchTab('students')">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-lg sm:text-xl">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                    <div>
+                        <div class="text-xl sm:text-2xl font-bold text-slate-800" id="stat-total-students">26</div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 font-semibold">Total Murid</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center space-x-3 sm:space-x-4 cursor-pointer hover:border-purple-300 transition" onclick="switchTab('materials')">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-lg sm:text-xl">
+                        <i class="fa-solid fa-book-open"></i>
+                    </div>
+                    <div>
+                        <div class="text-xl sm:text-2xl font-bold text-slate-800" id="stat-total-materials">5</div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 font-semibold">Modul Kuis</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center space-x-3 sm:space-x-4 cursor-pointer hover:border-green-300 transition" onclick="switchTab('excel')">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-lg sm:text-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                    <div>
+                        <div class="text-xl sm:text-2xl font-bold text-slate-800" id="stat-total-submissions">0</div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 font-semibold">Kuis Selesai</div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-3xl border border-slate-200 shadow-sm flex items-center space-x-3 sm:space-x-4 cursor-pointer hover:border-amber-300 transition" onclick="switchTab('games')">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-lg sm:text-xl">
+                        <i class="fa-solid fa-gamepad"></i>
+                    </div>
+                    <div>
+                        <div class="text-xl sm:text-2xl font-bold text-slate-800">5</div>
+                        <div class="text-[11px] sm:text-xs text-slate-400 font-semibold">Games Belajar</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Highlight Leaderboard & Announcements -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="kids-title text-xl font-bold text-slate-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-bullhorn text-red-500"></i>
+                            <span>Informasi Terbaru</span>
+                        </h3>
+                        <button onclick="switchTab('info')" class="text-xs font-bold text-red-500 hover:underline">Kelola</button>
+                    </div>
+                    <div id="dashboardAnnouncementBox" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h3 class="kids-title text-xl font-bold text-slate-800 flex items-center space-x-2">
+                            <i class="fa-solid fa-trophy text-amber-500"></i>
+                            <span>Top 3 Murid Berprestasi</span>
+                        </h3>
+                        <button onclick="switchTab('leaderboard')" class="text-xs font-bold text-teal-600 hover:underline">Lihat Semua</button>
+                    </div>
+                    <div id="dashboardTop3Container" class="space-y-3"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: MATERI & KUIS BERGAMBAR -->
+        <section id="tab-materials" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col lg:flex-row justify-between lg:items-center gap-4">
+                <div>
+                    <h2 class="kids-title text-2xl font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-book-open text-purple-500"></i>
+                        <span>Kuis Bergambar & Cerita Bersuara</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Setiap soal dilengkapi gambar menarik & tombol suara otomatis. Guru dapat menambah, mengubah, atau menghapus modul kapan saja.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <select id="mapelFilter" onchange="filterMaterialsGrid()" class="px-3 py-2.5 border border-slate-300 rounded-xl text-xs font-bold bg-slate-50">
+                        <option value="ALL">Semua Tema / Mapel</option>
+                        <option value="Mengenal Hewan & Alam">Mengenal Hewan & Alam</option>
+                        <option value="Buah, Sayur & Warna">Buah, Sayur & Warna</option>
+                        <option value="Berhitung & Angka Ceria">Berhitung & Angka Ceria</option>
+                        <option value="Huruf, Kata & Bahasa Inggris">Huruf, Kata & Bahasa Inggris</option>
+                        <option value="Bentuk, Transportasi & Profesi">Bentuk, Transportasi & Profesi</option>
+                    </select>
+                    <button onclick="openMaterialModal()" class="bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs px-4 py-2.5 rounded-2xl shadow flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus"></i>
+                        <span>Tambah Kuis Baru</span>
+                    </button>
+                    <button onclick="exportBackupJSON()" class="bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs px-3 py-2.5 rounded-2xl shadow flex items-center space-x-1.5" title="Simpan cadangan semua soal & data">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Backup Data</span>
+                    </button>
+                    <label class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs px-3 py-2.5 rounded-2xl shadow flex items-center space-x-1.5 cursor-pointer" title="Muat file cadangan JSON">
+                        <i class="fa-solid fa-upload"></i>
+                        <span>Restore Data</span>
+                        <input type="file" accept=".json" onchange="importBackupJSON(event)" class="hidden">
+                    </label>
+                </div>
+            </div>
+
+            <div id="materialsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- TAB 3: 5 MINI GAMES EDUKASI TK -->
+        <section id="tab-games" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+                <h2 class="kids-title text-2xl font-bold text-slate-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-gamepad text-indigo-500"></i>
+                    <span>Arena 5 Games Belajar Interaktif Anak TK</span>
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Dilengkapi suara ceria untuk melatih daya ingat, berhitung, mengenal warna, suara hewan, dan kosakata!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- GAME 1: MEMORY CARD HEWAN -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-indigo-100 shadow-sm space-y-4 text-center flex flex-col justify-between">
+                    <div>
+                        <span class="bg-indigo-100 text-indigo-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Daya Ingat</span>
+                        <h3 class="kids-title text-lg font-bold text-indigo-600 mt-2">🧠 1. Memory Kartu Hewan</h3>
+                        <p class="text-xs text-slate-500">Temukan 4 pasang gambar hewan yang sama!</p>
+                    </div>
+                    <div id="memoryBoard" class="grid grid-cols-4 gap-2.5 max-w-xs mx-auto w-full h-44"></div>
+                    <button onclick="initMemoryGame()" class="w-full py-2.5 bg-indigo-500 hover:bg-indigo-600 text-white text-xs font-bold rounded-xl shadow">Acak Ulang Kartu</button>
+                </div>
+
+                <!-- GAME 2: HITUNG BUAH & BINTANG -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-amber-100 shadow-sm space-y-4 text-center flex flex-col justify-between">
+                    <div>
+                        <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Berhitung 1-10</span>
+                        <h3 class="kids-title text-lg font-bold text-amber-600 mt-2">🍎 2. Hitung Jumlah Benda</h3>
+                        <p class="text-xs text-slate-500">Ada berapa banyak gambar di bawah ini?</p>
+                    </div>
+                    <div id="starCountingArea" class="text-3xl sm:text-4xl flex flex-wrap items-center justify-center gap-2 min-h-[96px] bg-amber-50 rounded-2xl p-3 border border-amber-200"></div>
+                    <div id="countingOptions" class="grid grid-cols-3 gap-2"></div>
+                </div>
+
+                <!-- GAME 3: TEBAK WARNA CERIA -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-pink-100 shadow-sm space-y-4 text-center flex flex-col justify-between">
+                    <div>
+                        <span class="bg-pink-100 text-pink-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Mengenal Warna</span>
+                        <h3 class="kids-title text-lg font-bold text-pink-600 mt-2">🎨 3. Tebak Warna Pelangi</h3>
+                        <p class="text-xs text-slate-500">Klik tombol warna yang sesuai dengan suara!</p>
+                    </div>
+                    <div class="bg-pink-50 rounded-2xl p-4 border border-pink-200 space-y-2">
+                        <div class="text-xs font-bold text-slate-500">Carilah Warna:</div>
+                        <div id="targetColorName" class="kids-title text-2xl font-black text-pink-600">MERAH</div>
+                        <button onclick="speakTargetColor()" class="text-xs bg-pink-200 hover:bg-pink-300 text-pink-900 font-bold px-3 py-1 rounded-full">
+                            <i class="fa-solid fa-volume-high"></i> Dengarkan Lagi
+                        </button>
+                    </div>
+                    <div id="colorGameOptions" class="grid grid-cols-2 gap-2.5"></div>
+                </div>
+
+                <!-- GAME 4: TEBAK BENTUK GEOMETRI -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-teal-100 shadow-sm space-y-4 text-center flex flex-col justify-between">
+                    <div>
+                        <span class="bg-teal-100 text-teal-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Bentuk & Logika</span>
+                        <h3 class="kids-title text-lg font-bold text-teal-600 mt-2">🔷 4. Tebak Bentuk Benda</h3>
+                        <p class="text-xs text-slate-500">Apa nama bentuk gambar di bawah ini?</p>
+                    </div>
+                    <div id="shapeDisplayArea" class="flex items-center justify-center h-28 bg-teal-50 rounded-2xl border border-teal-200"></div>
+                    <div id="shapeOptions" class="grid grid-cols-2 gap-2"></div>
+                </div>
+
+                <!-- GAME 5: TEBAK HURUF AWAL GAMBAR -->
+                <div class="bg-white p-6 rounded-3xl border-2 border-emerald-100 shadow-sm space-y-4 text-center flex flex-col justify-between md:col-span-2 lg:col-span-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-center gap-2">
+                        <div class="text-left">
+                            <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-3 py-1 rounded-full uppercase">Literasi & Fonik</span>
+                            <h3 class="kids-title text-lg font-bold text-emerald-600 mt-1">🔤 5. Tebak Huruf Awal Kata</h3>
+                        </div>
+                        <button onclick="speakPhonicsWordPrompt()" class="bg-emerald-100 hover:bg-emerald-200 text-emerald-800 text-xs font-bold px-4 py-2 rounded-xl">
+                            <i class="fa-solid fa-volume-high"></i> Ulangi Suara Kata
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center bg-emerald-50 p-4 rounded-2xl border border-emerald-200">
+                        <div class="text-center">
+                            <div id="letterGameEmoji" class="text-6xl mb-2">🐘</div>
+                            <div id="letterGameWordHint" class="kids-title text-xl font-bold text-slate-700 tracking-widest">_ A J A H</div>
+                        </div>
+                        <div id="letterGameOptions" class="grid grid-cols-2 gap-3"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PHONICS READING -->
+        <section id="tab-reading" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <h2 class="kids-title text-2xl font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-spell-check text-pink-500"></i>
+                        <span>Kartu Kata & Phonics Bersuara (ID / EN)</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Klik setiap kartu kata untuk mendengarkan pelafalan suara. Bisa ditambah, diubah, atau dihapus.</p>
+                </div>
+                <button onclick="openPhonicsModal()" class="bg-pink-500 hover:bg-pink-600 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-2xl shadow flex items-center space-x-1.5">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Modul Phonics</span>
+                </button>
+            </div>
+
+            <div id="readingCardsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- TAB 5: LEADERBOARD -->
+        <section id="tab-leaderboard" class="space-y-6 hidden">
+            <div class="bg-gradient-to-r from-amber-500 via-pink-500 to-purple-600 p-6 rounded-3xl text-white shadow-lg flex justify-between items-center">
+                <div>
+                    <h2 class="kids-title text-2xl font-bold flex items-center space-x-2">
+                        <i class="fa-solid fa-trophy text-amber-300"></i>
+                        <span>Papan Peringkat & Bintang Prestasi Siswa</span>
+                    </h2>
+                    <p class="text-xs text-amber-100 mt-1">Peringkat dihitung otomatis dari akumulasi skor kuis yang diselesaikan siswa.</p>
+                </div>
+                <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white/20 rounded-2xl backdrop-blur-md flex items-center justify-center text-2xl sm:text-3xl font-bold">🥇</div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 border-b border-slate-100 flex justify-between items-center">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Daftar Peringkat Nilai Kumulatif</span>
+                    <span class="text-xs font-semibold text-teal-600" id="leaderboardCountBadge">26 Murid Terdaftar</span>
+                </div>
+                <div class="divide-y divide-slate-100" id="leaderboardList"></div>
+            </div>
+        </section>
+
+        <!-- TAB 6: PENGUMUMAN & INFORMASI -->
+        <section id="tab-info" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <h2 class="kids-title text-2xl font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-bullhorn text-red-500"></i>
+                        <span>Pusat Informasi & Pengumuman Sekolah</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Kelola pengumuman resmi kegiatan TK Mutiara Harapan (Tambah, Ubah, Hapus).</p>
+                </div>
+                <button onclick="openAnnouncementModal()" class="bg-red-500 hover:bg-red-600 text-white font-bold text-xs sm:text-sm px-4 py-2.5 rounded-2xl shadow transition flex items-center justify-center space-x-1.5">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Tambah Pengumuman</span>
+                </button>
+            </div>
+
+            <div id="announcementsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <!-- TAB 7: DATA SISWA -->
+        <section id="tab-students" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <h2 class="kids-title text-2xl font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-users text-teal-500"></i>
+                        <span>Daftar Peserta Didik TK Mutiara Harapan</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1">Tambah, ubah, atau hapus data peserta didik dengan mudah.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="text" id="studentSearchInput" onkeyup="filterStudents()" placeholder="Cari Nama Murid..." class="px-3 py-2 border border-slate-300 rounded-xl text-xs w-44">
+                    <button onclick="openStudentModal()" class="bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs px-4 py-2.5 rounded-2xl shadow flex items-center space-x-1.5">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Tambah Murid</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="py-3 px-4 text-center">No</th>
+                            <th class="py-3 px-4">Nama Lengkap Siswa</th>
+                            <th class="py-3 px-4 text-center">JK</th>
+                            <th class="py-3 px-4">NIPD / NISN</th>
+                            <th class="py-3 px-4 text-center">Kelola (Ubah / Hapus)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody" class="divide-y divide-slate-100 text-xs"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- TAB 8: REKAP EXCEL -->
+        <section id="tab-excel" class="space-y-6 hidden">
+            <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+                <div>
+                    <h2 class="kids-title text-2xl font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-file-excel text-green-600"></i>
+                        <span>Rekapitulasi Nilai & Hasil Kuis Siswa</span>
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-1" id="rekap-submisi-count">Penyimpanan otomatis di browser</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2">
+                    <input type="text" id="rekapSearchInput" onkeyup="renderExcelTable()" placeholder="Filter Nama..." class="px-3 py-2 border border-slate-300 rounded-xl text-xs w-full sm:w-44">
+                    <button onclick="adminResetAssessmentCycle()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs px-4 py-2.5 rounded-2xl shadow flex items-center space-x-1.5">
+                        <i class="fa-solid fa-rotate-left"></i>
+                        <span>Reset Nilai</span>
+                    </button>
+                    <button onclick="exportToCSV()" class="bg-green-600 hover:bg-green-700 text-white font-bold text-xs px-4 py-2.5 rounded-2xl shadow flex items-center space-x-1.5">
+                        <i class="fa-solid fa-download"></i>
+                        <span>Unduh Excel (CSV)</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-3xl border border-slate-200 shadow-sm overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                            <th class="py-3 px-4">Waktu Selesai</th>
+                            <th class="py-3 px-4">Nama Murid</th>
+                            <th class="py-3 px-4">Judul Kuis</th>
+                            <th class="py-3 px-4">Level</th>
+                            <th class="py-3 px-4 text-center">Skor Nilai</th>
+                            <th class="py-3 px-4 text-center">Predikat</th>
+                            <th class="py-3 px-4 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="excelTableBody" class="divide-y divide-slate-100 text-xs"></tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- =====================================================================
+         MODAL 1: KUIS & CERITA INTERAKTIF BERGAMBAR + SUARA
+         ===================================================================== -->
+    <div id="quizModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl space-y-5 relative border-4 border-amber-300 max-h-[92vh] overflow-y-auto">
+            <button onclick="closeQuizModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl no-print">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div id="printableArea" class="space-y-5">
+                <!-- Step 1: Pilih Siswa -->
+                <div id="quizStepSelectStudent" class="space-y-4 no-print">
+                    <div class="text-center space-y-2">
+                        <span class="bg-purple-100 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">Kuis Interaktif Bersuara</span>
+                        <h3 class="kids-title text-2xl font-bold text-slate-800" id="quizModalMaterialTitle">Mulai Kuis Interaktif</h3>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1.5">Pilih Nama Murid yang Mengerjakan:</label>
+                        <select id="quizStudentSelect" class="w-full px-4 py-3 rounded-xl border-2 border-slate-200 font-bold text-slate-800 focus:border-teal-500 focus:outline-none"></select>
+                    </div>
+                    <button onclick="startQuizQuestions()" class="w-full py-3.5 bg-teal-500 hover:bg-teal-600 text-white font-bold rounded-xl shadow-lg text-sm">
+                        Mulai Kerjakan & Dengarkan Cerita 🚀
+                    </button>
+                </div>
+
+                <!-- Step 2: Pertanyaan Aktif & Gambar -->
+                <div id="quizStepQuestions" class="space-y-4 hidden no-print">
+                    <div class="flex justify-between items-center text-xs font-bold text-slate-500 border-b border-slate-100 pb-2">
+                        <span id="activeQuizStudentName" class="text-teal-700">Nama Siswa</span>
+                        <span id="activeQuizProgress" class="bg-amber-100 text-amber-900 px-3 py-1 rounded-full">Soal 1 / 3</span>
+                    </div>
+
+                    <!-- Cerita Pengantar -->
+                    <div id="activeStoryContainer" class="bg-amber-50 p-3.5 rounded-2xl border border-amber-200 space-y-1.5 hidden">
+                        <div class="flex justify-between items-center">
+                            <span class="text-[11px] font-bold text-amber-800 uppercase"><i class="fa-solid fa-book-open"></i> Cerita Pengantar</span>
+                            <button onclick="speakStoryText()" class="text-xs bg-amber-200 hover:bg-amber-300 text-amber-900 font-bold px-2.5 py-1 rounded-lg">
+                                <i class="fa-solid fa-volume-high"></i> Bacakan Cerita
+                            </button>
+                        </div>
+                        <div id="activeStoryText" class="text-xs sm:text-sm text-slate-700 leading-relaxed font-medium"></div>
+                    </div>
+
+                    <!-- Gambar Soal -->
+                    <div id="activeSingleQImageContainer" class="rounded-2xl overflow-hidden h-44 sm:h-52 bg-slate-100 hidden border-2 border-slate-200 flex items-center justify-center">
+                        <img id="activeSingleQImage" src="" class="w-full h-full object-cover" alt="Gambar Soal">
+                    </div>
+
+                    <!-- Teks Soal + Tombol Suara -->
+                    <div class="flex items-start justify-between space-x-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                        <h4 id="activeQuestionText" class="kids-title text-lg sm:text-xl font-bold text-slate-800 leading-snug">Pertanyaan...</h4>
+                        <button onclick="speakActiveQuestion()" class="p-3 bg-amber-400 hover:bg-amber-500 text-amber-950 rounded-xl shadow flex-shrink-0 active:scale-95 transition" title="Dengarkan Soal & Pilihan">
+                            <i class="fa-solid fa-volume-high text-base"></i>
+                        </button>
+                    </div>
+
+                    <!-- Pilihan Jawaban (Bisa Bergambar / Emoji + Suara) -->
+                    <div id="activeQuestionOptionsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+                </div>
+
+                <!-- Step 3: Hasil & PDF -->
+                <div id="quizStepResult" class="space-y-4 text-center hidden py-2">
+                    <div id="rewardEmoji" class="text-6xl animate-bounce">🏆</div>
+                    <h3 class="kids-title text-2xl font-bold text-slate-800">Hebat! Kuis Selesai!</h3>
+                    <div class="text-xs text-slate-500">Hasil Pengerjaan: <span id="resultStudentNameDisplay" class="font-bold text-slate-800">---</span></div>
+                    <div class="text-5xl font-black text-teal-600" id="resultScoreValue">100</div>
+                    <div class="text-xs font-bold px-3 py-1 bg-green-100 text-green-700 rounded-full inline-block" id="resultStatusBadge">Sangat Baik</div>
+                    
+                    <div class="bg-amber-50 p-4 rounded-2xl border border-amber-200 text-center space-y-1">
+                        <div class="text-amber-500 text-2xl space-x-1">⭐ ⭐ ⭐ ⭐ ⭐</div>
+                        <p id="rewardMessage" class="kids-title text-base text-amber-900 font-bold">"Selamat! Kamu mendapat Bintang Emas!"</p>
+                    </div>
+
+                    <div class="text-left bg-slate-50 p-4 rounded-2xl border border-slate-200 space-y-2.5 mt-3">
+                        <h4 class="font-bold text-xs uppercase tracking-wider text-slate-700 border-b pb-1.5">Rincian Jawaban:</h4>
+                        <div id="pdfReviewQuestions" class="space-y-2 text-xs"></div>
+                    </div>
+
+                    <div class="pt-2 flex flex-wrap justify-center gap-2 no-print">
+                        <button onclick="downloadAsPDF()" class="px-5 py-2.5 bg-green-600 hover:bg-green-700 text-white font-bold text-xs rounded-xl shadow flex items-center space-x-1.5">
+                            <i class="fa-solid fa-file-pdf"></i>
+                            <span>Unduh PDF Hasil</span>
+                        </button>
+                        <button onclick="closeQuizModal()" class="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl shadow">
+                            Selesai & Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 2: TAMBAH / UBAH KUIS BERGAMBAR (FORMAT MUDAH DIGANTI)
+         ===================================================================== -->
+    <div id="addMaterialModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="kids-title text-xl font-bold text-slate-800" id="materialModalTitle">Buat / Ubah Kuis Bergambar</h3>
+                <button onclick="closeModal('addMaterialModal')" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="addMaterialForm" onsubmit="handleSaveMaterial(event)" class="space-y-4 text-xs sm:text-sm">
+                <input type="hidden" id="matEditId" value="">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tema / Mata Pelajaran *</label>
+                        <select id="matMapel" required class="w-full px-3 py-2 border border-slate-300 rounded-xl font-bold">
+                            <option value="Mengenal Hewan & Alam">Mengenal Hewan & Alam</option>
+                            <option value="Buah, Sayur & Warna">Buah, Sayur & Warna</option>
+                            <option value="Berhitung & Angka Ceria">Berhitung & Angka Ceria</option>
+                            <option value="Huruf, Kata & Bahasa Inggris">Huruf, Kata & Bahasa Inggris</option>
+                            <option value="Bentuk, Transportasi & Profesi">Bentuk, Transportasi & Profesi</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Tingkat Kesulitan *</label>
+                        <select id="matLevel" required class="w-full px-3 py-2 border border-slate-300 rounded-xl font-bold">
+                            <option value="EASY">Level Mudah (TK A)</option>
+                            <option value="MEDIUM">Level Sedang (TK B)</option>
+                            <option value="HARD">Level Tantangan</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Judul Kuis *</label>
+                        <input type="text" id="matTitle" required placeholder="Contoh: Mengenal Hewan Ternak" class="w-full px-3 py-2 border border-slate-300 rounded-xl">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Cerita Pengantar (Dibacakan Suara)</label>
+                        <textarea id="matStoryText" rows="3" placeholder="Tuliskan cerita singkat sebelum anak menjawab soal..." class="w-full px-3 py-2 border border-slate-300 rounded-xl"></textarea>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Gambar Cover Kuis (Link URL atau Upload File)</label>
+                        <input type="text" id="matImageUrl" oninput="previewImageInput('matImageUrl', 'matImgPreview')" placeholder="Tempel Link Gambar (https://...)" class="w-full px-3 py-2 border border-slate-300 rounded-xl text-xs mb-1.5">
+                        <input type="file" accept="image/*" onchange="handleLocalImageUpload(event, 'matImageUrl', 'matImgPreview')" class="text-xs text-slate-500">
+                        <div class="mt-1.5 h-20 rounded-xl overflow-hidden bg-slate-100 border border-slate-300">
+                            <img id="matImgPreview" src="" class="w-full h-full object-cover" alt="Preview Cover">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- DAFTAR PERTANYAAN BERGAMBAR -->
+                <div class="border-t border-slate-200 pt-3 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h4 class="font-bold text-slate-800 text-sm">Daftar Pertanyaan Bergambar (Otomatis Bersuara)</h4>
+                        <button type="button" onclick="addQuestionField()" class="bg-purple-100 hover:bg-purple-200 text-purple-800 text-xs font-bold px-3 py-1.5 rounded-xl">
+                            + Tambah Soal Baru
+                        </button>
+                    </div>
+                    <div id="questionsContainer" class="space-y-4"></div>
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('addMaterialModal')" class="px-4 py-2 rounded-xl text-slate-600 border border-slate-300">Batal</button>
+                    <button type="submit" class="px-6 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold shadow">Simpan Kuis</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 3: TAMBAH / UBAH PHONICS
+         ===================================================================== -->
+    <div id="addPhonicsModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="kids-title text-xl font-bold text-slate-800" id="phonicsModalTitle">Tambah / Ubah Modul Phonics</h3>
+                <button onclick="closeModal('addPhonicsModal')" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form onsubmit="handleSavePhonics(event)" class="space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="phonicsEditId" value="">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Judul Modul Phonics *</label>
+                    <input type="text" id="phonicsTitle" required placeholder="Contoh: Nama Buah-Buahan" class="w-full px-3 py-2 border border-slate-300 rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Bahasa Suara Pelafalan *</label>
+                    <select id="phonicsLang" required class="w-full px-3 py-2 border border-slate-300 rounded-xl font-bold">
+                        <option value="id-ID">Bahasa Indonesia (ID)</option>
+                        <option value="en-US">Bahasa Inggris (EN)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Daftar Kata (Pisahkan dengan Koma) *</label>
+                    <input type="text" id="phonicsWords" required placeholder="Contoh: APEL, JERUK, MANGGA, PISANG" class="w-full px-3 py-2 border border-slate-300 rounded-xl">
+                </div>
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('addPhonicsModal')" class="px-4 py-2 rounded-xl text-slate-600 border border-slate-300">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-pink-500 hover:bg-pink-600 text-white font-bold shadow">Simpan Phonics</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 4: TAMBAH / UBAH SISWA
+         ===================================================================== -->
+    <div id="addStudentModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="kids-title text-xl font-bold text-slate-800" id="studentModalTitle">Tambah / Ubah Data Murid</h3>
+                <button onclick="closeModal('addStudentModal')" class="text-slate-400 hover:text-slate-600">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            <form onsubmit="handleSaveStudent(event)" class="space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="studentEditId" value="">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Nama Lengkap Murid *</label>
+                    <input type="text" id="inputStudentName" required class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">Jenis Kelamin *</label>
+                        <select id="inputStudentGender" required class="w-full px-3 py-2 border rounded-xl">
+                            <option value="L">Laki-Laki (L)</option>
+                            <option value="P">Perempuan (P)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-semibold text-slate-700 mb-1">NIPD / NISN</label>
+                        <input type="text" id="inputStudentNipd" placeholder="Opsional" class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('addStudentModal')" class="px-4 py-2 rounded-xl text-slate-600 border border-slate-300">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold shadow">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL 5: TAMBAH / UBAH PENGUMUMAN
+         ===================================================================== -->
+    <div id="addAnnouncementModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                <h3 class="kids-title text-xl font-bold text-slate-800" id="announcementModalTitle">Tambah / Ubah Pengumuman</h3>
+                <button onclick="closeModal('addAnnouncementModal')" class="text-slate-400 hover:text-slate-600 text-lg">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="addAnnouncementForm" onsubmit="handleSaveAnnouncement(event)" class="space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="annEditId" value="">
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Kategori Pengumuman *</label>
+                    <select id="annCategory" required class="w-full px-3 py-2 border border-slate-300 rounded-xl">
+                        <option value="SURAT">📜 Surat Edaran Resmi</option>
+                        <option value="LIBUR">🎉 Pengumuman Libur Sekolah</option>
+                        <option value="PPDB">✨ Pendaftaran Murid Baru (PPDB)</option>
+                        <option value="KEGIATAN">🎈 Agenda / Acara Sekolah</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Judul Pengumuman *</label>
+                    <input type="text" id="annTitle" required placeholder="Judul pengumuman..." class="w-full px-3 py-2 border border-slate-300 rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Tanggal Rilis *</label>
+                    <input type="date" id="annDate" required class="w-full px-3 py-2 border border-slate-300 rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-semibold text-slate-700 mb-1">Isi Pengumuman *</label>
+                    <textarea id="annContent" rows="3" required placeholder="Tuliskan detail pengumuman..." class="w-full px-3 py-2 border border-slate-300 rounded-xl"></textarea>
+                </div>
+
+                <div class="pt-3 flex justify-end space-x-2">
+                    <button type="button" onclick="closeModal('addAnnouncementModal')" class="px-4 py-2 rounded-xl text-slate-600 border border-slate-300">Batal</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold shadow">Simpan Pengumuman</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DATA & APPLICATION SCRIPTS -->
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

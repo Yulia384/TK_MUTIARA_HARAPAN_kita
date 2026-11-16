@@ -1,0 +1,67 @@
+/* =========================================================================
+   STYLE.CSS - MUTIARA SMART SCHOOL (TK MUTIARA HARAPAN)
+   ========================================================================= */
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #F4F7FE;
+    background-image: radial-gradient(#CBD5E0 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.kids-title {
+    font-family: 'Fredoka', cursive;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: #EDF2F7;
+}
+::-webkit-scrollbar-thumb {
+    background: #CBD5E0;
+    border-radius: 4px;
+}
+
+/* Animasi Kartu Game */
+.memory-card {
+    transition: transform 0.25s ease, background-color 0.25s ease;
+    user-select: none;
+}
+.memory-card:hover {
+    transform: translateY(-2px);
+}
+
+.option-card {
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.option-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.08);
+}
+.option-card:active {
+    transform: scale(0.98);
+}
+
+/* Print / PDF Styling */
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #printableArea, #printableArea * {
+        visibility: visible;
+    }
+    #printableArea {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .no-print {
+        display: none !important;
+    }
+}
